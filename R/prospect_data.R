@@ -23,7 +23,7 @@
 ##' @references Feret et al. (2008). http://teledetection.ipgp.jussieu.fr/prosail/
 ##' @author Shawn Serbin
 ##' 
-tav <- function(teta,ref){ 
+tav.f <- function(teta,ref){ 
   ### Based on Feret et al., (2008).  Source code
   ### downloaded from http://teledetection.ipgp.jussieu.fr/prosail/
   
@@ -57,8 +57,38 @@ tav <- function(teta,ref){
   tp5 <- 16*r2^(3)*((2*rp*b-rm2)^(-1)-(2*rp*a-rm2)^(-1))/rp^3
   tp <- tp1+tp2+tp3+tp4+tp5
   f <- (ts+tp)/(2*ds^2)
+  return(f)
   
 }
+
+## Generate data file for given prospect model
+prospect.datamatrix <- function(model){
+	if (model == "prospect4"){
+		load("data/dataSpec_p4.RData")
+		dat <- dataSpec_p4[,-4]    # Drop empty Car absorption features column
+	}
+	else if (model == "prospect5"){
+		load("data/dataSpec_p5.RData")
+		dat <- dataSpec_p5
+	}
+	else if (model == "prospect5b"){
+		load("data/dataSpec_p5B.RData")
+		dat <- dataSpec_p5B
+	}
+	nd <- ncol(dat)
+	nr <- dat$refractive_index
+	t90 <- tav.f(90, nr)
+	tav <- tav.f(40, nr)
+	tao1 <- tav
+	tao2 <- t90 / nr^2
+	rho1 <- 1 - tao1
+	rho2 <- 1 - tao2
+	x <- tav / t90
+	y <- x * (t90 - 1) + 1 - tav
+	pdat <-  as.matrix(cbind(dat[,3:nd], tao1, tao2, rho1, rho2, x, y))	
+	return(pdat)
+}
+
 #==================================================================================================#
 
 
