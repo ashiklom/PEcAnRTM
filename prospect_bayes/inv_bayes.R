@@ -25,6 +25,13 @@
 source("prospect.R")
 source("timer.R")
 source("truncnorm.R")
+
+guess.inits <- c(N=1.4, 
+              Cab=30,
+              Cw=0.017,
+              Cm=0.006
+              )
+
 source("mle_inversion.R")
 
 ## Use specdatproc script to generate correct "obs.spec" matrix from data.
@@ -175,6 +182,16 @@ pinvbayes <- function(obs.spec,
                       append=FALSE)
         }
 
+
+		# Special setup needed for new C function
+		dyn.load('prospect_bayes.so') # load functions defined in this library
+		load("data/dataSpec_p4.RData") # load input data, from prospect.R   
+		dataSpec_p4 <- as.matrix(dataSpec_p4) # cont'd 
+		n.a <- dataSpec_p4[,"refractive_index"] # cont'd
+		cab.a <- dataSpec_p4[,"specific_abs_coeff_chl"] # cont'd
+		w.a <- dataSpec_p4[,"specific_abs_coeff_cw"] # cont'd
+		m.a <- dataSpec_p4[,"specific_abs_coeff_cm"] # cont'd
+
         ## MCMC loop
         tstart <- proc.time()
         ar <- 0
@@ -323,27 +340,156 @@ pinvbayes <- function(obs.spec,
                 ### Sample random effects ###
 
                 if(random.effects != 'none'){
-                        ## Sample alphaN
-                        for (i in 1:nre){
-                                guess.alphaN <- alphaN.i
-                                guess.alphaN[i] <- rnorm(1, alphaN.i[i], JumpSD.alpha["N"])
-                                guess.spec <- prospect(N.i + guess.alphaN[i],
-                                                       Cab.i + alphaCab.i[i],
-                                                       Cw.i + alphaCw.i[i],
-                                                       Cm.i + alphaCm.i[i]
-                                                       )
-                                guess.error <- prev.error
-                                guess.error[,randeff.list[[i]]] <- spec.error(guess.spec, obs.spec[, randeff.list[[i]]])
-                                guess.posterior <- likelihood(guess.error, sd.i) + dnorm(guess.alphaN[i], 0, sdreN, log=TRUE)
-                                prev.posterior <- likelihood(prev.error, sd.i) + dnorm(alphaN.i[i], 0, sdreN, log=TRUE)
-                                a <- exp(guess.posterior - prev.posterior)
-                                if(is.na(a)) a <- -1
-                                if(a > runif(1)){
-                                        alphaN.i <- guess.alphaN
-                                        prev.error <- guess.error
-                                        ar.alpha <- ar.alpha + 1
-                                }
-                        }
+
+
+                        # KFM: START COMPARISON
+						# Compare the execution time of the sample alpha N code block in the original R, new R, 
+						# and C implementations. 
+
+						# initialize variables needed for new R and C implementations
+						prev.error.like <- likelihood(prev.error, sd.i) 
+						randeff.ind = cumsum(unlist(lapply(randeff.list, function(x) length(x))))
+						randeff.ind = as.integer(c(0, randeff.ind))							
+					
+						# store "input variables" for reuse, 
+						## note:  +1-1 is to make sure that R copies the variables, instead of creating pointers
+						alphaN.i.0 <- alphaN.i+1-1
+						prev.error.0 <- prev.error+1-1
+						ar.alpha.0 <- ar.alpha+1-1
+						prev.error.like.0 <- prev.error.like+1-1
+
+
+						# R, original version ------
+						
+						# set initial state
+						## note:  +1-1 is to make sure that R copies the variables, instead of creating pointers
+						set.seed(g)
+						alphaN.i <- alphaN.i.0+1-1
+						prev.error <- prev.error.0+1-1
+						ar.alpha <- ar.alpha.0+1-1
+						start.time.1 <- proc.time()
+
+						## Sample alphaN 
+						for (i in 1:nre){
+								guess.alphaN <- alphaN.i
+								guess.alphaN[i] <- rnorm(1, alphaN.i[i], JumpSD.alpha["N"])
+								guess.spec <- prospect(N.i + guess.alphaN[i],
+													   Cab.i + alphaCab.i[i],
+													   Cw.i + alphaCw.i[i],
+													   Cm.i + alphaCm.i[i]
+													   )
+								guess.error <- prev.error
+								guess.error[,randeff.list[[i]]] <- spec.error(guess.spec, obs.spec[, randeff.list[[i]]])
+								guess.posterior <- likelihood(guess.error, sd.i) + dnorm(guess.alphaN[i], 0, sdreN, log=TRUE)
+								prev.posterior <- likelihood(prev.error, sd.i) + dnorm(alphaN.i[i], 0, sdreN, log=TRUE)
+								a <- exp(guess.posterior - prev.posterior)
+								if(is.na(a)) a <- -1
+								if(a > runif(1)){
+										alphaN.i <- guess.alphaN
+										prev.error <- guess.error
+										ar.alpha <- ar.alpha + 1
+								}
+						}
+
+						#  get final state
+						alphaN.i.1 <- alphaN.i+1-1
+						prev.error.1 <- prev.error+1-1
+						ar.alpha.1 <- ar.alpha+1-1
+						stop.time.1 <- proc.time()
+						
+						# R, new version ----------
+
+						# set initial state
+						## note:  +1-1 is to make sure that R copies the variables, instead of creating pointers
+						set.seed(g)
+						alphaN.i <- alphaN.i.0+1-1
+						prev.error <- prev.error.0+1-1
+						ar.alpha <- ar.alpha.0+1-1
+						prev.error.like <- prev.error.like.0+1-1
+						start.time.2 <- proc.time()
+
+						## Sample alphaN 
+						for (i in 1:nre){
+								guess.alphaN <- rnorm(1, alphaN.i[i], JumpSD.alpha["N"])
+								guess.spec <- prospect(N.i + guess.alphaN,
+													   Cab.i + alphaCab.i[i],
+													   Cw.i + alphaCw.i[i],
+													   Cm.i + alphaCm.i[i]
+													   )
+								guess.error <- prev.error+1-1
+								guess.error[,randeff.list[[i]]] <- spec.error(guess.spec, obs.spec[, randeff.list[[i]]])
+								guess.error.like <- likelihood(guess.error, sd.i) # store for reuse
+								guess.posterior <-  guess.error.like + dnorm(guess.alphaN, 0, sdreN, log=TRUE)
+								prev.posterior <- prev.error.like + dnorm(alphaN.i[i], 0, sdreN, log=TRUE)
+								a <- exp(guess.posterior - prev.posterior)
+								if(is.na(a)) a <- -1
+								if(a > runif(1)){
+										alphaN.i[i] <- guess.alphaN
+										prev.error <- guess.error
+										prev.error.like <- guess.error.like # update, without recalculating
+										ar.alpha <- ar.alpha + 1
+								}
+						}
+
+						#  get final state
+						alphaN.i.2 <- alphaN.i+1-1
+						prev.error.2 <- prev.error+1-1
+						ar.alpha.2 <- ar.alpha+1-1
+						stop.time.2 <- proc.time()
+
+
+						# C version ------
+						
+						# set initial state
+						set.seed(g)
+						alphaN.i <- alphaN.i.0+1-1
+						prev.error <- prev.error.0+1-1
+						ar.alpha <- ar.alpha.0+1-1
+						prev.error.like <- prev.error.like.0+1-1
+						start.time.3 <- proc.time()
+						
+						# run external routines
+						.Call('sample_alpha_n', 
+								nre, nwl, nspec,
+								alphaN.i, alphaCab.i, alphaCw.i, alphaCm.i, JumpSD.alpha["N"],
+								N.i, Cab.i, Cw.i, Cm.i, 
+								n.a, cab.a, w.a, m.a,
+								prev.error, randeff.ind, obs.spec,
+								sd.i, sdreN, prev.error.like, ar.alpha)
+						
+						#  get final state
+						alphaN.i.3 <- alphaN.i+1-1
+						prev.error.3 <- prev.error+1-1
+						ar.alpha.3 <- ar.alpha+1-1
+						stop.time.3 <- proc.time()
+						
+
+						# compare ----------
+						cat(sprintf('\nIteration: %i\n', g))
+
+						cat(sprintf('R Original:\n'))
+						print(stop.time.1-start.time.1)
+						
+						cat(sprintf('R New:\n'))
+						print(stop.time.2-start.time.2)
+						cat(sprintf('Tests: alphaN,i=%i, prev.error=%i, ar.alpha=%i\n',
+									 min(alphaN.i.1==alphaN.i.2), 
+									 min(prev.error.1==prev.error.2), 
+									 min(ar.alpha.1==ar.alpha.2) ))
+						
+						cat(sprintf('C:\n'))
+						print(stop.time.3-start.time.3)
+						cat(sprintf('Tests: alphaN,i=%i, prev.error=%i, ar.alpha=%i\n',
+									 min(alphaN.i.1==alphaN.i.3), 
+									 min(prev.error.1==prev.error.3), 
+									 min(ar.alpha.1==ar.alpha.3) ))
+
+						# reset to R version outputs
+						alphaN.i <- alphaN.i.1
+						prev.error <- prev.error.1
+						ar.alpha <- ar.alpha.1
+						
+						# KFM: END COMPARISON
 
                         ## Sample alphaCab
                         for (i in 1:nre){

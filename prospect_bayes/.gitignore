@@ -3,6 +3,11 @@
 .RData
 .dat
 .qlog
-.Rproj
-figures
-miscellaneous
+*.swp
+*~
+*.o
+*.so
+data/
+deprecated/
+figures/
+miscellaneous/

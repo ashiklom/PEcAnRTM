@@ -1,11 +1,6 @@
 ##' Process MCMC results.
 
 library(coda)
-library(data.table)
-
-SPECIES.PATH <- "miscellaneous/species_info.csv"
-species.info <- read.csv(SPECIES.PATH)
-species.short <- species.info[,c(1,2)]
 
 ##' @name get.results
 ##' @title Load MCMC chains
@@ -23,7 +18,7 @@ species.short <- species.info[,c(1,2)]
 ##' 
 ##' @author Alexey Shiklomanov
 
-get.results <- function(path, burnin=5e4, thin=100, species="All"){
+get.results <- function(path, burnin=0, thin=1, species="All"){
         flist <- list.files(path)
         if(species != "All") flist <- flist[grep(species, flist)]
         flist <- flist[which(nchar(flist) > 5)]
@@ -36,11 +31,10 @@ get.results <- function(path, burnin=5e4, thin=100, species="All"){
                         fset <- flist[grep(sprintf("%s_.*_%s_.*", species, re), flist)]
                         print(fset)
                         if(length(fset) > 0){
-                                speclist <- lapply(fset, function(x) data.frame(fread(paste(path, x, sep=''), 
-                                                                              header=TRUE)))
+                                speclist <- lapply(fset, function(x) read.csv(paste(path, x, sep=''), 
+                                                                              header=TRUE))
                                 min.spec <- min(sapply(speclist, nrow))
                                 samples <- seq(burnin, min.spec, by=thin)
-                                print(sprintf("%d samples", length(samples)*length(fset)))
                                 speclist <- lapply(speclist, "[", samples,,drop=FALSE)
                                 speclist <- lapply(speclist, mcmc)
                                 assign(sprintf("%s.%s.l", species, re), mcmc.list(speclist), envir = .GlobalEnv)
@@ -98,49 +92,10 @@ chain.plots <- function(mcmclist){
 ##' 
 ##' @author Alexey Shiklomanov
 
-sumtab <- function(m, m.name=deparse(substitute(m))) {
+sumtab <- function(m) {
         s <- summary(m)
         means <- s$statistics[,1]
-        ci.low <- s$quantiles[,1]
-        ci.up <- s$quantiles[,5]
-        ci.range <- ci.up - ci.low
-        out <- data.frame(rbind(means, ci.low, ci.up, ci.range),
-                          vartype = c("mean", "ci_low", "ci_up", "ci_range"), 
-                          row.names = NULL)
-        out$species <- m.name
+        ci <- s$quantiles[,5] - s$quantiles[,1]
+        out <- rbind(means, ci)
         return(out)
-}
-
-##' @name 
-##' @title Build large results table
-##' 
-
-results.table <- function(path=FALSE){
-        if(path!=FALSE){
-                get.results(path)
-        }
-        results.vec <- ls(".GlobalEnv")
-        results.vec <- results.vec[grep("\\.l$", results.vec)]
-        tablist <- lapply(results.vec, function(x) sumtab(get(x), x))
-        results.tab <- do.call(rbind, tablist)
-        return(results.tab)
-}
-
-process.big <- function(m, m.name){
-        m.bind <- data.frame(do.call(rbind, m), row.names=NULL)
-        m.bind$species <- gsub("(.*)\\.[a-z]+\\.l$", "\\1", m.name)
-        return(m.bind)
-}
-        
-
-results.big <- function(path=FALSE){
-        if(path!=FALSE){
-                get.results(path)
-        }
-        results.vec <- ls(".GlobalEnv")
-        results.vec <- results.vec[grep("\\.l$", results.vec)]
-        results.list <- lapply(results.vec, function(x) process.big(get(x), x))
-        results.big <- data.frame(do.call(rbind, results.list), row.names=NULL)
-        results.big <- merge(results.big, species.short)
-        return(results.big)
 }
