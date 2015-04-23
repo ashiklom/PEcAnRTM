@@ -1,0 +1,8 @@
+.PHONY = all mylibs
+all: $(SHLIB)
+$(SHLIB): mylibs
+
+mylibs:
+	(cd RTM; make)
+
+PKG_LIBS = $(FLIBS) -LRTM/RTM.so
