@@ -1,19 +1,12 @@
-# Makefile for radiative transfer models
-# Author: Alexey Shiklomanov, Dept of Earth and Environment / Boston University
+# Makevars file for PEcAnRTM package
+# Author: Alexey Shiklomanov
 # Email: ashiklom@bu.edu
 
-# Compilers
-FC = gfortran -ffree-form
-FC_fixed = gfortran -ffixed-form
-
-# Optimization
-OPT = -O2
-
 # Folder paths
-f_prospect = prospect/
-f_sail = sail/
-f_ps = prosail/
-f_ds = dataSpec/
+f_pp = RTM/prospect/
+f_sl = RTM/sail/
+f_ps = RTM/prosail/
+f_ds = RTM/dataSpec/
 
 # Module shorthand
 mod_f = $(f_ds)prosail.dataSpec_
@@ -25,11 +18,11 @@ SAIL = sail.so
 PROSAIL = prosail.so
 
 # RTM dependencies
-PROSPECT_depends = $(f_prospect)*.f90 $(mod_m)prospect5b.o $(mod_m)refractive.o
-SAIL_depends = $(PROSPECT) $(f_sail)*.f90 $(mod_m)soil.o
+PROSPECT_depends = $(f_pp)*.f90 $(mod_m)prospect5b.o $(mod_m)refractive.o
+SAIL_depends = $(PROSPECT) $(f_ss)*.f90 $(mod_m)soil.o
 PROSAIL_depends = $(PROSPECT) $(SAIL) $(f_ps)prosail.main.f90
 
-$(PROSAIL) : $(RTM_depends)
+$(PROSAIL) : $(PROSAIL_depends)
 	$(FC) -g -shared $(f_ps)prosail.main.f90 $(SAIL) $(PROSPECT) -o $(PROSAIL) -fPIC 
 
 $(PROSPECT) : $(PROSPECT_depends)
@@ -44,9 +37,9 @@ $(mod_m)prospect5b.o $(mod_m)refractive.o $(mod_m)soil.o : $(mod_f)wavelength.f9
 	$(FC) -c $(mod_f)refractive.f90 -o $(mod_m)refractive.o 
 	$(FC) -c $(mod_f)soil.f90 -o $(mod_m)soil.o 
 
-pecan.rtm.so : cpp/*.cpp 
-	gcc -c cpp/*.cpp -o *.o
-	gcc -shared *.o $(PROSPECT) $(SAIL) $(PROSAIL) -o pecan.rtm.so
+PKG_LIBS = -LRTM $(FLIBS)
+$(SHLIB) : RTM/bin/pecan.rtm.so
 
 clean :
 	rm *.so *.o *.mod
+

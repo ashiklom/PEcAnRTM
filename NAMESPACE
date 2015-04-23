@@ -1,3 +1,6 @@
 useDynLib(PEcAnRTM)
+useDynLib(prospect)
+useDynLib(sail)
+useDynLib(prosail)
 exportPattern("^[[:alpha:]]+")
 importFrom(Rcpp, evalCpp)

@@ -1,9 +1,9 @@
-.PHONY = all mylibs
-all: $(SHLIB)
-$(SHLIB): mylibs
+# Makevars file for PEcAnRTM package
+# Author: Alexey Shiklomanov
+# Email: ashiklom@bu.edu
 
-mylibs:
-	(cd RTM; make)
-
-PKG_CPPFLAGS = -IRTM/bin/
-
+PKG_LIBS = -LRTM $(FLIBS)
+$(SHLIB) : RTM/bin/pecan.rtm.so
+	
+RTM/pecan.rtm.so
+	@(cd RTM && $(MAKE) pecan.rtm.so)
