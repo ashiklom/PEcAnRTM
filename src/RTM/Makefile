@@ -23,14 +23,15 @@ mod_m = $(bin)mod_dataspec_
 # RTM shared libraries
 PROSPECT = $(bin)prospect.so
 SAIL = $(bin)sail.so
+PROSAIL = $(bin)prosail.so
 
 # RTM dependencies
 PROSPECT_depends = $(f_prospect)*.f90 $(mod_m)prospect5b.o $(mod_m)refractive.o
 SAIL_depends = $(PROSPECT) $(f_sail)*.f90 $(mod_m)soil.o
-RTM_depends = $(PROSPECT) $(SAIL) $(f_ps)prosail.main.f90
+PROSAIL_depends = $(PROSPECT) $(SAIL) $(f_ps)prosail.main.f90
 
-RTM.so : $(RTM_depends)
-	$(FC) -g -shared $(f_ps)prosail.main.f90 $(SAIL) $(PROSPECT) -o RTM.so -fPIC -I$(bin)
+$(PROSAIL) : $(RTM_depends)
+	$(FC) -g -shared $(f_ps)prosail.main.f90 $(SAIL) $(PROSPECT) -o $(PROSAIL) -fPIC -I$(bin)
 
 $(PROSPECT) : $(PROSPECT_depends)
 	$(FC) -g -shared $(PROSPECT_depends) -o $(PROSPECT) -I$(bin) -fPIC
@@ -45,4 +46,4 @@ $(mod_m)prospect5b.o $(mod_m)refractive.o $(mod_m)soil.o : $(mod_f)wavelength.f9
 	$(FC) -c $(mod_f)soil.f90 -I$(bin) -J$(bin) -o $(mod_m)soil.o 
 
 clean :
-	rm bin/* RTM.so
+	rm bin/*

@@ -5,4 +5,5 @@ $(SHLIB): mylibs
 mylibs:
 	(cd RTM; make)
 
-PKG_LIBS = $(FLIBS) -LRTM/RTM.so
+PKG_CPPFLAGS = -IRTM/bin/
+

@@ -29,15 +29,20 @@ pro4sail <- function(params = sail.def){
 	return(out)
 }
 
+png("prospect.png")
 prosp <- prospect_5b_sail()
 plot(prosp[,1], type='l', ylim=c(0,1))
 lines(1-prosp[,2], col=2)
 title("PROSPECT output")
+dev.off()
 
+png("prosail.png")
 sail <- pro4sail()
 plot(sail[,1], type='l')
 lines(sail[,2], col=2)
 lines(sail[,3], col=3)
 lines(sail[,4], col=4)
 title("SAIL output")
+dev.off()
+
 
