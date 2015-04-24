@@ -1,23 +1,6 @@
 ## Simple wrapper for PROSAIL
-# setwd("../src/RTM")
-dyn.load("prosail.so")
-
-prosp.def <- c("N" = 1.5, 
-               "Cab" = 40, 
-               "Car" = 8, 
-               "Cbrown" = 0, 
-               "Cw" = 0.01, 
-               "Cm" = 0.009)
-sail.def = c(prosp.def,
-             "LIDFa" = -0.35, 
-             "LIDFb" = -0.15,
-             "LIDFtype" = as.integer(1), 
-             "LAI" = 3,
-             "q" = 0.01,
-             "tts" = 30,
-             "tto" = 10,
-             "psi" = 0,
-             "psoil" = 1)
+path.lib <- "~/Documents/Unsynced/PEcAnRTM/src/RTM/prosail.so"
+dyn.load(path.lib)
 
 pro4sail <- function(params, constants){
     param.order <- c("N", "Cab", "Car", "Cbrown", "Cw", "Cm",
@@ -95,27 +78,34 @@ invert.sail <- function(observed, inits, constants, ngibbs, prior, pm){
     return(results)
 }
             
+## Default SAIL parameters
+prosp.def <- c("N" = 1.5, 
+               "Cab" = 40, 
+               "Car" = 8, 
+               "Cbrown" = 0, 
+               "Cw" = 0.01, 
+               "Cm" = 0.009)
+sail.def = c(prosp.def,
+             "LIDFa" = -0.35, 
+             "LIDFb" = -0.15,
+             "LIDFtype" = as.integer(1), 
+             "LAI" = 3,
+             "q" = 0.01,
+             "tts" = 30,
+             "tto" = 10,
+             "psi" = 0,
+             "psoil" = 1)
 
-invert.pars <- c("LAI", "Cab", "Car")
-nip <- names(sail.def) %in% invert.pars
-test.constants <- sail.def[!nip]
-test.inits <- numeric(3)
-test.inits["LAI"] <- 2
-test.inits["Cab"] <- 25
-test.inits["Car"] <- 5
-test_obs <- pro4sail(test.inits, test.constants)
-test.prior <- list()
-test.prior[[1]] <- function(x) dnorm(log(x), 0, 100, 1)
-test.prior[[2]] <- function(x) dnorm(log(x), 0, 100, 1)
-test.prior[[3]] <- function(x) dnorm(log(x), 0, 100, 1)
-test.pm <- rep(0,3)
+## Prepare sail constants based on default values
+sail.constants <- function(params){
+    par.ind <- names(sail.def) %in% names(params)
+    constants <- sail.def[!par.ind]
+    return(constants)
+}
 
-tt <- test_inv <- invert.sail(test_obs, sail.def[nip], 
-                              sail.def[!nip], 1000,
-                              test.prior, test.pm)
-
-par(mfrow=c(2,2))
-plot(test_inv[,1], type='l')
-plot(test_inv[,2], type='l')
-plot(test_inv[,3], type='l')
-plot(test_inv[,4], type='l')
+## Uninformative priors (lognormal)
+sail.priors <- function(n, std=100){
+    prior <- list()
+    for(i in 1:n) prior[[i]] <- function(x) dnorm(log(x), 0, std, 1)
+    return(prior)
+}

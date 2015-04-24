@@ -1,9 +1,0 @@
-# Makevars file for PEcAnRTM package
-# Author: Alexey Shiklomanov
-# Email: ashiklom@bu.edu
-
-PKG_LIBS = -LRTM $(FLIBS)
-$(SHLIB) : RTM/bin/pecan.rtm.so
-	
-RTM/pecan.rtm.so
-	@(cd RTM && $(MAKE) pecan.rtm.so)
