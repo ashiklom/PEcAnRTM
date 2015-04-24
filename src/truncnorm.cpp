@@ -1,6 +1,4 @@
-#include <Rcpp.h>
-#include <Rmath.h>
-using namespace Rcpp;
+#include "common_funcs.h"
 
 double rtnorm(double mu, double sd, double MIN){
     double x = rnorm(1, mu, sd)[0];

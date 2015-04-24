@@ -1,8 +1,4 @@
-#include <stdio.h>
 #include "common_funcs.h"
-#include <Rmath.h>
-#include <Rcpp.h>
-using namespace Rcpp;
 
 // Compute random_effects matrix
 // Calculates individual spectrum for each leaf and returns spec matrix

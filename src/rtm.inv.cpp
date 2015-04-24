@@ -7,7 +7,7 @@ NumericVector prospect4_def(NumericVector param){
     NumericVector R(2101);
 
     prospect_4_(N, Cab, Cw, Cm, RT);
-    R = RT(_,1);
+    R = RT(_,0);
     return R;
 }
 
@@ -18,7 +18,7 @@ NumericVector prospect5_def(NumericVector param){
     NumericVector R(2101);
 
     prospect_5_(N, Cab, Car, Cw, Cm, RT);
-    R = RT(_,1);
+    R = RT(_,0);
     return R;
 }
 
@@ -29,6 +29,6 @@ NumericVector prospect5b_def(NumericVector param){
     NumericVector R(2101);
 
     prospect_5b_(N, Cab, Car, Cbrown, Cw, Cm, RT);
-    R = RT(_,1);
+    R = RT(_,0);
     return R;
 }

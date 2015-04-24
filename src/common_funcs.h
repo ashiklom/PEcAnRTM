@@ -1,5 +1,7 @@
 // Define common functions for later use
+#include <stdio.h>
 #include <Rcpp.h>
+#include <Rmath.h>
 using namespace Rcpp;
 
 double exp_int(double k);

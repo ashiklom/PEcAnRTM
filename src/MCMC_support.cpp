@@ -1,6 +1,4 @@
 #include "common_funcs.h"
-#include <Rcpp.h>
-using namespace Rcpp;
 
 // NOTE: Overloaded function - Can take vector or matrix 'Model'
 NumericMatrix SpecError(NumericVector Model, NumericMatrix Observed){

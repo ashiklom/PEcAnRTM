@@ -1,6 +1,4 @@
 #include "common_funcs.h"
-#include <Rcpp.h>
-using namespace Rcpp;
 
 // Basic Metropolis Hastings
 //      Sample parameters one at a time in a loop

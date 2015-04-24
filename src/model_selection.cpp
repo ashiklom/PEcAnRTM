@@ -1,8 +1,4 @@
-#include <stdio.h>
 #include "common_funcs.h"
-#include <Rmath.h>
-#include <Rcpp.h>
-using namespace Rcpp;
 
 typedef NumericVector (*select_model)(NumericVector);
 typedef double (*select_prior)(int, double);

@@ -1,8 +1,4 @@
-#include <stdio.h>
 #include "common_funcs.h"
-#include <Rmath.h>
-#include <Rcpp.h>
-using namespace Rcpp;
 
 // [[Rcpp::export]]
 NumericMatrix invert_RTM(

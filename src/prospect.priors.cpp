@@ -1,6 +1,4 @@
-#include <Rcpp.h>
-#include <Rmath.h>
-using namespace Rcpp;
+#include "common_funcs.h"
 
 // Priors for PROSPECT4 model
 double prospect4_priors(int param, double value){
