@@ -27,10 +27,10 @@ PROSAIL = prosail.so
 # RTM dependencies
 PROSPECT_depends = $(f_prospect)*.f90 $(mod_m)prospect5b.o $(mod_m)refractive.o
 SAIL_depends = $(PROSPECT) $(f_sail)*.f90 $(mod_m)soil.o
-PROSAIL_depends = $(PROSPECT) $(SAIL) $(f_ps)prosail.main.f90
+PROSAIL_depends = $(PROSPECT_depends) $(SAIL_depends) $(f_ps)prosail.main.f90
 
-$(PROSAIL) : $(RTM_depends)
-	$(FC) -g -shared $(f_ps)prosail.main.f90 $(SAIL) $(PROSPECT) -o $(PROSAIL) -fPIC 
+$(PROSAIL) : $(PROSAIL_depends)
+	$(FC) -g -shared $(PROSAIL_depends) -o $(PROSAIL) -fPIC 
 
 $(PROSPECT) : $(PROSPECT_depends)
 	$(FC) -g -shared $(PROSPECT_depends) -o $(PROSPECT) -fPIC
@@ -44,9 +44,5 @@ $(mod_m)prospect5b.o $(mod_m)refractive.o $(mod_m)soil.o : $(mod_f)wavelength.f9
 	$(FC) -c $(mod_f)refractive.f90 -o $(mod_m)refractive.o 
 	$(FC) -c $(mod_f)soil.f90 -o $(mod_m)soil.o 
 
-pecan.rtm.so : cpp/*.cpp 
-	gcc -c cpp/*.cpp -o *.o
-	gcc -shared *.o $(PROSPECT) $(SAIL) $(PROSAIL) -o pecan.rtm.so
-
 clean :
-	rm *.so *.o *.mod
+	rm *.o 

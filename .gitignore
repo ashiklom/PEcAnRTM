@@ -1,5 +1,8 @@
 *.so
 *.o
+*.mod
 *RcppExports.*
 
 .Rproj.user
+*.Rproj
+.Rhistory
