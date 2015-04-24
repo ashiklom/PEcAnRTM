@@ -7,17 +7,16 @@ using namespace Rcpp;
 // Compute random_effects matrix
 // Calculates individual spectrum for each leaf and returns spec matrix
 NumericMatrix RE_model(
-        NumericVector (*Model)(NumericVector, NumericMatrix),
+        NumericVector (*Model)(NumericVector),
         NumericVector param,
-        NumericMatrix re,
-        NumericMatrix p4data)
+        NumericMatrix re)
 {
-    int wl = p4data.nrow();
+    int wl = 2101;
     int nre = re.ncol();
     NumericMatrix re_model(wl, nre);
     NumericVector pass_par(param.size());
     for(int i=0; i<nre; i++){
-        re_model(_,i) = Model(param + re(_,i), p4data);
+        re_model(_,i) = Model(param + re(_,i));
     }
     return re_model;
 }
@@ -30,8 +29,7 @@ NumericMatrix invert_RTM_re(
         float adapt,                // How often to adapt Jump SD
         float adj_min,              // Minimum value by which to adapt Jump
         NumericVector values,       // Vector of parameter mean initial conditions
-        NumericMatrix re_values,    // Matrix of random effects initial conditions (par x re)
-        NumericMatrix func_data)    // Input data for the RTM (e.g. absorption features)
+        NumericMatrix re_values)    // Matrix of random effects initial conditions (par x re)
 {
     int nspec = Observed.ncol();
     int nre = re_values.ncol();
@@ -55,7 +53,7 @@ NumericMatrix invert_RTM_re(
     NumericVector alpha_rp2(nre), tau(nre), tinv(nre);
 
     // Precalculate first model
-    NumericVector PrevSpec = RE_model(Model, values, re_values, func_data);
+    NumericVector PrevSpec = RE_model(Model, values, re_values);
     NumericMatrix PrevError = SpecError(PrevSpec, Observed);
 
     // Initialize Jump distribution
@@ -96,7 +94,7 @@ NumericMatrix invert_RTM_re(
         for(int p = 0; p<npars; p++){
             Tvec = clone(values);
             Tvec[p] = rtnorm(values[p], Jump[p], pmin[p]);
-            TrySpec = RE_model(Model, Tvec, re_values, func_data);
+            TrySpec = RE_model(Model, Tvec, re_values);
             TryError = SpecError(TrySpec, Observed);
             TryPost = Likelihood(TryError, rsd) + Prior(p, Tvec[p]);
             PrevPost = Likelihood(PrevError, rsd) + Prior(p, values[p]);
@@ -117,7 +115,7 @@ NumericMatrix invert_RTM_re(
                 Tpar = rtnorm(re_values(p,r), alpha_Jump[p], Tmin);
                 Tvec = values + re_values(_,r);
                 Tvec[p] = values[p] + Tpar;
-                TrySpec_alpha = Model(Tvec, func_data);
+                TrySpec_alpha = Model(Tvec);
                 TryError_alpha = TrySpec_alpha - Observed(_,r);
                 TryPost = Likelihood(TryError_alpha, rsd) + R::dnorm(Tpar, 0, tau[p], 1);
                 PrevPost = Likelihood(PrevError(_,r), rsd) + R::dnorm(re_values(p,r), 0, tau[p], 1);

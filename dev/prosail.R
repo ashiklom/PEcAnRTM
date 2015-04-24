@@ -1,6 +1,6 @@
 ## Simple wrapper for PROSAIL
-#setwd("../src/RTM")
-#dyn.load("RTM.so")
+setwd("../src")
+dyn.load("PEcAnRTM.so")
 
 prosp.def <- list(1.5, 40, 8, 0, 0.01, 0.009)
 

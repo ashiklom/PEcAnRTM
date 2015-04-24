@@ -30,7 +30,7 @@ NumericMatrix invert_RTM(
     rsd = 0.5;                      // Initial condition for residual SD
 
     // Precalculate first model
-    NumericVector PrevSpec = Model(inits, func_data);
+    NumericVector PrevSpec = Model(inits);
     NumericMatrix PrevError = SpecError(PrevSpec, Observed);
 
     NumericVector Jump = inits * 0.05;  // Jump distribution vector - starts at 5% of initial conditions
@@ -53,7 +53,7 @@ NumericMatrix invert_RTM(
             adapt_count = 0;
         }
         // Sample model parameters - Basic Metropolis Hastings
-        sampler_MH(inits, rsd, Jump, Observed, PrevError, ar, Model, Prior, pmin, func_data);
+        sampler_MH(inits, rsd, Jump, Observed, PrevError, ar, Model, Prior, pmin);
         for(int p = 0; p<npars; p++) results(ng, p) = inits[p];
 
         // Sample residual SD

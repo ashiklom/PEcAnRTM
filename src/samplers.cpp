@@ -11,7 +11,7 @@ void sampler_MH(
         NumericMatrix &Observed,
         NumericMatrix &PrevError,
         NumericVector &ar,
-        NumericVector (*Model)(NumericVector, NumericMatrix),
+        NumericVector (*Model)(NumericVector),
         double (*Prior)(int, double),
         NumericVector &pmin,
         NumericMatrix &func_data)
@@ -26,7 +26,7 @@ void sampler_MH(
     for(int p = 0; p<npars; p++){
         Tvec = clone(inits);
         Tvec[p] = rtnorm(inits[p], Jump[p], pmin[p]);
-        TrySpec = Model(Tvec, func_data);
+        TrySpec = Model(Tvec);
         TryError = SpecError(TrySpec, Observed);
         TryPost = Likelihood(TryError, rsd) + Prior(p, Tvec[p]);
         PrevPost = Likelihood(PrevError, rsd) + Prior(p, inits[p]);
