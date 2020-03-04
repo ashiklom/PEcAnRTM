@@ -3,10 +3,11 @@ context('Inversion using BayesianTools')
 
 skip_on_travis()
 
-skip_if_not(
-  interactive(),
-  "Long-running tests. Only run in interactive mode."
-)
+skip("RTM inversion is not robust in standalone version.")
+## skip_if_not(
+##   interactive(),
+##   "Long-running tests. Only run in interactive mode."
+## )
 
 set.seed(12345678)
 true_prospect <- defparam('prospect_5')
