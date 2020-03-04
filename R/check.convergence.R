@@ -16,6 +16,7 @@ check.convergence <- function(jags_out,
                               threshold = 1.1,
                               verbose = TRUE,
                               ...){
+  testForPackage("coda")
   if (!coda::is.mcmc.list(jags_out)) {
     stop("Input needs to be of class 'mcmc.list'")
   }

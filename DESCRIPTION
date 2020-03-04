@@ -13,15 +13,14 @@ Description: This package contains functions for performing forward runs and
     using maximum likelihood, or more complex hierarchical Bayesian methods.
     Underlying numerical analyses are optimized for speed using Fortran code.
 Imports:
-    PEcAn.logger,
     MASS,
+Suggests:
+    BayesianTools,
     coda,
     lubridate (>= 1.6.0),
-    PEcAn.assim.batch,
-    BayesianTools
-Suggests:
     minpack.lm,
     mclust,
+    PEcAn.assim.batch,
     PEcAn.utils,
     PEcAn.ED2,
     XML,

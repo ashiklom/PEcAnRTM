@@ -57,6 +57,8 @@ invert.auto <- function(observed, invert.options,
                         parallel.cores=NULL,
                         parallel.output = '/dev/null') {
 
+  testForPackage("coda")
+
   if (parallel == TRUE) {
     testForPackage("parallel")
   } else {

@@ -128,6 +128,10 @@ prospect_bt_prior <- function(version, custom_prior = list()) {
 #' @export
 invert_bt <- function(observed, model, prior, custom_settings = list(), loglike = NULL) {
 
+  testForPackage("BayesianTools")
+  testForPackage("PEcAn.assim.batch")
+  testForPackage("coda")
+
   default_settings <- list(
     common = list(),
     init = list(iterations = 10000),

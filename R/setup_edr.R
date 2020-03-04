@@ -17,9 +17,11 @@ setup_edr <- function(ed2in, output_dir,
                                              12, 00, 00, tz = "UTC"),
                       ...) {
 
+  testForPackage("PEcAn.ED2")
+
   hour <- as.numeric(strftime(datetime, "%H", tz = "UTC"))
   if (hour < 8 | hour > 17) {
-    PEcAn.logger::logger.warn(
+    warning(
       "Starting hour ", hour,
       " is not between 8am and 5pm. ",
       "It is generally a good idea to run EDR during the day to get good results."
