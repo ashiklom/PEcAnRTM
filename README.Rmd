@@ -1,46 +1,55 @@
+---
+output:
+  github_document:
+    html_preview: false
+---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# PEcAn Radiative Transfer Modeling module – standalone version
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
 
-**Corresponding author** Alexey Shiklomanov NASA Goddard Space Flight
-Center <alexey.shiklomanov@nasa.gov>
+# PEcAn Radiative Transfer Modeling module -- standalone version
+
+**Corresponding author**
+Alexey Shiklomanov
+NASA Goddard Space Flight Center
+alexey.shiklomanov@nasa.gov
 
 ## Installation
 
-Easiest way to install is via `install_github` from the `devtools`
-package.
+Easiest way to install is via `install_github` from the `devtools` package.
 
-``` r
+```r
 devtools::install_github("ashiklom/pecanrtm")
 ```
 
 If you want a specific branch, do `install_github(..., ref="<branch>")`.
 
-From there, you should be able to load the package in your typical R
-session.
+From there, you should be able to load the package in your typical R session.
 
-*NOTE: On some OS X systems, the automatic specification of `gfortran`
-will fail, causing the installation to abort. To fix this issue, you
-will need to add something like the following the `~/.R/Makevars` file.*
+*NOTE: On some OS X systems, the automatic specification of `gfortran` will 
+fail, causing the installation to abort. To fix this issue, you will need to 
+add something like the following the `~/.R/Makevars` file.*
 
-    FC = gfortran
+```
+FC = gfortran
+```
 
-For more information, see the vignette
-(`vignettes/pecanrtm.vignettes.Rmd`).
+For more information, see the vignette (`vignettes/pecanrtm.vignettes.Rmd`).
 
 ## Usage
 
-Simulate leaf reflectance and transmittance with different versions of
-the PROSPECT model.
+Simulate leaf reflectance and transmittance with different versions of the PROSPECT model.
 
-``` r
+```{r}
 library(PEcAnRTM)
-#> 
-#> Attaching package: 'PEcAnRTM'
-#> The following object is masked from 'package:graphics':
-#> 
-#>     matplot
 p4 <- prospect(c(N = 1.4, Cab = 40, Cw = 0.01, Cm = 0.005), version = "4")
 p5 <- prospect(c(N = 1.4, Cab = 40, Car = 8, Cw = 0.01, Cm = 0.005), version = "5")
 p5b <- prospect(c(
@@ -67,12 +76,9 @@ lines(wl, 1 - pd[, 2], col = 5, lty = 2)
 legend("topright", c("4", "5", "5B", "D"), col = 2:5, lty = 1)
 ```
 
-<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
+Simulate canopy reflectance with the PRO4SAIL model (PROSPECT 5B coupled to the 4SAIL canopy RTM).
 
-Simulate canopy reflectance with the PRO4SAIL model (PROSPECT 5B coupled
-to the 4SAIL canopy RTM).
-
-``` r
+```{r}
 canopy <- pro4sail(c(
   N = 1.4, Cab = 40, Car = 8, Cbrown = 0, Cw = 0.01, Cm = 0.009,
   # Leaf angle distribution function parameters
@@ -94,5 +100,3 @@ canopy <- pro4sail(c(
 matplot(canopy)
 legend("topright", c("BHR", "HDR", "DHR", "BDR"), col = 1:4, lty = 1:4)
 ```
-
-<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
