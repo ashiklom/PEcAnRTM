@@ -1,15 +1,19 @@
-# PEcAn Radiative Transfer Modeling module
-**Corresponding author**  
-Alexey Shiklomanov  
-Dept. of Earth and Environment  
-Boston University  
-ashiklom@bu.edu  
+# PEcAn Radiative Transfer Modeling module -- standalone version
+
+**Corresponding author**
+
+Alexey Shiklomanov
+
+NASA Goddard Space Flight Center
+
+alexey.shiklomanov@nasa.gov
 
 ## Installation
+
 Easiest way to install is via `install_github` from the `devtools` package.
 
 ```R
-devtools::install_github("PecanProject/pecan", subdir="modules/rtm", ref='develop')
+devtools::install_github("ashiklom/pecanrtm")
 ```
 
 If you want a specific branch, do `install_github(..., ref="<branch>")`.
