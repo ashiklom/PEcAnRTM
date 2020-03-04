@@ -3,8 +3,13 @@
 
 # PEcAn Radiative Transfer Modeling module – standalone version
 
-**Corresponding author** Alexey Shiklomanov NASA Goddard Space Flight
-Center <alexey.shiklomanov@nasa.gov>
+**Corresponding author**:
+
+Alexey Shiklomanov
+
+NASA Goddard Space Flight Center
+
+<alexey.shiklomanov@nasa.gov>
 
 ## Installation
 
